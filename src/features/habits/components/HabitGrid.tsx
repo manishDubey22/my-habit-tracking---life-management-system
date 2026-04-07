@@ -13,9 +13,13 @@ import { useHabitStore } from "../../../store/habitStore";
 import { monthRangeKeys } from "../../../utils/date";
 
 export function HabitGrid() {
-  const habits = useHabitStore((s) => s.habits.filter((h) => h.active));
+  const habits = useHabitStore((s) => s.habits);
   const completions = useHabitStore((s) => s.completions);
   const toggleCompletion = useHabitStore((s) => s.toggleCompletion);
+  const activeHabits = useMemo(
+    () => habits.filter((habit) => habit.active),
+    [habits],
+  );
 
   const today = dayjs();
   const dateKeys = useMemo(
@@ -23,7 +27,7 @@ export function HabitGrid() {
     [today],
   );
 
-  if (habits.length === 0) {
+  if (activeHabits.length === 0) {
     return <Typography color="text.secondary">No habits yet.</Typography>;
   }
 
@@ -41,7 +45,7 @@ export function HabitGrid() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {habits.map((habit) => (
+          {activeHabits.map((habit) => (
             <TableRow key={habit.id}>
               <TableCell>{habit.title}</TableCell>
               {dateKeys.map((dateKey) => {
