@@ -1,4 +1,5 @@
 import dayjs from "dayjs";
+import { monthRangeKeys } from "./date";
 
 export interface WeekGroup {
   key: string;
@@ -23,4 +24,12 @@ export function groupDateKeysByWeek(dateKeys: string[]): WeekGroup[] {
   }
 
   return Array.from(map.values());
+}
+
+export function getMonthWeekGroups(
+  year: number,
+  monthIndex: number,
+): WeekGroup[] {
+  const dateKeys = monthRangeKeys(year, monthIndex);
+  return groupDateKeysByWeek(dateKeys);
 }
