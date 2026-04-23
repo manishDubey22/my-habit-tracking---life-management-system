@@ -1,22 +1,20 @@
-import { Container, Paper, Stack, Typography } from "@mui/material";
-import { DashboardPage } from "../../features/dashboard/pages/DashboardPage";
+import { Box, Container } from "@mui/material";
+import { Outlet } from "react-router-dom";
 
 export function AppShell() {
   return (
-    <main className="min-h-screen py-8">
-      <Container maxWidth="xl">
-        <Stack spacing={3}>
-          <Paper elevation={0} className="p-5">
-            <Typography variant="h4" sx={{ fontWeight: 700 }}>
-              Routine Tracker
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Habit tracking and analytics foundation
-            </Typography>
-          </Paper>
-          <DashboardPage />
-        </Stack>
+    <Box
+      component="main"
+      sx={{
+        minHeight: "100vh",
+        background:
+          "radial-gradient(circle at top right, rgba(192, 168, 221, 0.18), transparent 28%), var(--app-bg)",
+        py: { xs: 3, md: 5 },
+      }}
+    >
+      <Container maxWidth="xl" sx={{ px: { xs: 2, md: 3 } }}>
+        <Outlet />
       </Container>
-    </main>
+    </Box>
   );
 }

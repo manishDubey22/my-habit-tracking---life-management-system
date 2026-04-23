@@ -1,11 +1,11 @@
 import dayjs from "dayjs";
 
 export function toDateKey(value: string | Date): string {
-  return dayjs(value).format("YYYY-MM-DD");
+  return dayjs(value).startOf("day").format("YYYY-MM-DD");
 }
 
 export function todayKey(): string {
-  return dayjs().format("YYYY-MM-DD");
+  return dayjs().startOf("day").format("YYYY-MM-DD");
 }
 
 export function daysInMonth(year: number, monthIndex: number): number {
@@ -17,4 +17,12 @@ export function monthRangeKeys(year: number, monthIndex: number): string[] {
   return Array.from({ length: total }, (_, i) =>
     toDateKey(new Date(year, monthIndex, i + 1)),
   );
+}
+
+export function completionKey(habitId: string, value: string | Date): string {
+  return `${habitId}-${toDateKey(value)}`;
+}
+
+export function parseDateKey(dateKey: string): dayjs.Dayjs {
+  return dayjs(dateKey).startOf("day");
 }

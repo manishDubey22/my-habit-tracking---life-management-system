@@ -1,9 +1,11 @@
 export type HabitCategory =
   | "Health"
-  | "Mindset"
-  | "Productivity"
+  | "Fitness"
   | "Learning"
-  | "Lifestyle"
+  | "Personal"
+  | "Work"
+  | "Social"
+  | "Mindfulness"
   | "Other";
 
 export interface Habit {

@@ -6,3 +6,5 @@ export interface Completion {
   createdAt: string;
   updatedAt: string;
 }
+
+export type CompletionMap = Record<string, boolean>;
