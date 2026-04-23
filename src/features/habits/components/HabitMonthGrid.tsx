@@ -14,6 +14,25 @@ interface HabitMonthGridProps {
 const HABIT_COLUMN_WIDTH = 240;
 const DAY_COLUMN_WIDTH = 52;
 
+const weekBands = [
+  {
+    background: "rgba(159, 187, 224, 0.22)",
+    backgroundStrong: "rgba(159, 187, 224, 0.3)",
+    text: "#355d8f",
+  },
+  {
+    background: "rgba(192, 168, 221, 0.24)",
+    backgroundStrong: "rgba(192, 168, 221, 0.34)",
+    text: "#6f43a6",
+  },
+] as const;
+
+function getWeekStartKey(dateKey: string) {
+  const date = dayjs(dateKey);
+  const mondayOffset = (date.day() + 6) % 7;
+  return date.subtract(mondayOffset, "day").format("YYYY-MM-DD");
+}
+
 export function HabitMonthGrid({
   habits,
   completions,
@@ -21,6 +40,10 @@ export function HabitMonthGrid({
   onToggle,
 }: HabitMonthGridProps) {
   const gridTemplateColumns = `${HABIT_COLUMN_WIDTH}px repeat(${dateKeys.length}, ${DAY_COLUMN_WIDTH}px)`;
+  const weekStartOrder = Array.from(new Set(dateKeys.map(getWeekStartKey)));
+  const weekIndexByStart = new Map(
+    weekStartOrder.map((weekStart, index) => [weekStart, index]),
+  );
 
   return (
     <Paper sx={{ p: { xs: 2, md: 3 }, borderRadius: 4 }}>
@@ -56,7 +79,10 @@ export function HabitMonthGrid({
           </Box>
 
           {dateKeys.map((dateKey, index) => {
-            const isAltWeek = Math.floor(index / 7) % 2 === 1;
+            const weekIndex =
+              weekIndexByStart.get(getWeekStartKey(dateKey)) ?? 0;
+            const band = weekBands[weekIndex % weekBands.length];
+            const isWeekStart = index === 0 || dayjs(dateKey).day() === 1;
 
             return (
               <Box
@@ -70,17 +96,21 @@ export function HabitMonthGrid({
                   justifyContent: "center",
                   gap: 0.25,
                   borderRadius: 2,
-                  backgroundColor: isAltWeek
-                    ? "rgba(143, 46, 255, 0.08)"
-                    : "rgba(38, 37, 30, 0.03)",
+                  backgroundColor: band.backgroundStrong,
+                  borderLeft: isWeekStart
+                    ? "2px solid rgba(38, 37, 30, 0.12)"
+                    : "none",
                 }}
               >
-                <Typography variant="caption" color="text.secondary">
+                <Typography
+                  variant="caption"
+                  sx={{ color: band.text, fontWeight: 600 }}
+                >
                   {dayjs(dateKey).format("ddd")}
                 </Typography>
                 <Typography
                   variant="h4"
-                  sx={{ fontSize: "1rem", color: "secondary.main" }}
+                  sx={{ fontSize: "1rem", color: band.text }}
                 >
                   {dayjs(dateKey).format("D")}
                 </Typography>
@@ -133,7 +163,10 @@ export function HabitMonthGrid({
                   habit.id,
                   dateKey,
                 );
-                const isAltWeek = Math.floor(index / 7) % 2 === 1;
+                const weekIndex =
+                  weekIndexByStart.get(getWeekStartKey(dateKey)) ?? 0;
+                const band = weekBands[weekIndex % weekBands.length];
+                const isWeekStart = index === 0 || dayjs(dateKey).day() === 1;
 
                 return (
                   <Box
@@ -151,10 +184,11 @@ export function HabitMonthGrid({
                         : "rgba(38, 37, 30, 0.12)",
                       backgroundColor: checked
                         ? `${habit.color ?? "#8f2eff"}18`
-                        : isAltWeek
-                          ? "rgba(143, 46, 255, 0.06)"
-                          : "rgba(38, 37, 30, 0.02)",
+                        : band.background,
                       color: habit.color ?? "secondary.main",
+                      boxShadow: isWeekStart
+                        ? "inset 2px 0 0 rgba(38, 37, 30, 0.1)"
+                        : "none",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -166,9 +200,7 @@ export function HabitMonthGrid({
                         borderColor: habit.color ?? "secondary.main",
                         backgroundColor: checked
                           ? `${habit.color ?? "#8f2eff"}22`
-                          : isAltWeek
-                            ? "rgba(143, 46, 255, 0.1)"
-                            : "rgba(38, 37, 30, 0.05)",
+                          : band.backgroundStrong,
                       },
                     }}
                   >
