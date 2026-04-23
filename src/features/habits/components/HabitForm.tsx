@@ -1,14 +1,16 @@
 import { Button, MenuItem, Stack, TextField } from "@mui/material";
 import { useState } from "react";
 import type { HabitCategory } from "../../../domain/models/habit";
-import { useHabitStore } from "../../../store/habitStore";
+import { useHabitStore } from "../../../store/useHabitStore";
 
 const categories: HabitCategory[] = [
   "Health",
-  "Mindset",
-  "Productivity",
+  "Fitness",
   "Learning",
-  "Lifestyle",
+  "Personal",
+  "Work",
+  "Social",
+  "Mindfulness",
   "Other",
 ];
 

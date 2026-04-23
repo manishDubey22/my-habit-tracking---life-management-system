@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import dayjs from "dayjs";
 import { useMemo } from "react";
-import { useHabitStore } from "../../../store/habitStore";
+import { useHabitStore } from "../../../store/useHabitStore";
 import { monthRangeKeys } from "../../../utils/date";
 
 export function HabitGrid() {
