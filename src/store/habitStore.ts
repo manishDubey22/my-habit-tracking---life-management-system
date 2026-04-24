@@ -1,9 +1,12 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { Habit } from "../domain/models/habit";
-import type { Completion } from "../domain/models/completion";
+import type {
+  CompletionMap,
+  LegacyCompletion,
+} from "../domain/models/completion";
+import { completionKey, toDateKey } from "../utils/date";
 import { createId } from "../utils/ids";
-import { toDateKey } from "../utils/date";
 
 interface CreateHabitInput {
   title: string;
@@ -18,18 +21,32 @@ interface UpdateHabitInput extends Partial<CreateHabitInput> {
 
 interface HabitState {
   habits: Habit[];
-  completions: Completion[];
+  completions: CompletionMap;
   addHabit: (input: CreateHabitInput) => void;
   updateHabit: (input: UpdateHabitInput) => void;
   deleteHabit: (habitId: string) => void;
   toggleCompletion: (habitId: string, date: string) => void;
 }
 
+function normalizeCompletions(
+  completions: CompletionMap | LegacyCompletion[] | undefined,
+) {
+  if (!completions) return {};
+  if (!Array.isArray(completions)) return completions;
+
+  return completions.reduce<CompletionMap>((acc, completion) => {
+    if (completion.completed) {
+      acc[completionKey(completion.habitId, completion.dateKey)] = true;
+    }
+    return acc;
+  }, {});
+}
+
 export const useHabitStore = create<HabitState>()(
   persist(
     (set) => ({
       habits: [],
-      completions: [],
+      completions: {},
 
       addHabit: (input) =>
         set((state) => {
@@ -75,33 +92,37 @@ export const useHabitStore = create<HabitState>()(
       toggleCompletion: (habitId, date) =>
         set((state) => {
           const dateKey = toDateKey(date);
-          const existing = state.completions.find(
-            (c) => c.habitId === habitId && c.dateKey === dateKey,
-          );
+          const key = completionKey(habitId, dateKey);
 
-          if (existing) {
-            return {
-              completions: state.completions.filter(
-                (c) => c.id !== existing.id,
-              ),
-            };
+          if (state.completions[key]) {
+            const nextCompletions = { ...state.completions };
+            delete nextCompletions[key];
+            return { completions: nextCompletions };
           }
 
-          const now = new Date().toISOString();
-          const completion: Completion = {
-            id: createId(),
-            habitId,
-            dateKey,
-            completed: true,
-            createdAt: now,
-            updatedAt: now,
+          return {
+            completions: {
+              ...state.completions,
+              [key]: true,
+            },
           };
-          return { completions: [...state.completions, completion] };
         }),
     }),
     {
       name: "routine-tracker-store",
+      version: 2,
       storage: createJSONStorage(() => localStorage),
+      migrate: (persistedState) => {
+        const state = persistedState as {
+          habits?: Habit[];
+          completions?: CompletionMap | LegacyCompletion[];
+        };
+
+        return {
+          habits: state?.habits ?? [],
+          completions: normalizeCompletions(state?.completions),
+        };
+      },
       partialize: (state) => ({
         habits: state.habits,
         completions: state.completions,
