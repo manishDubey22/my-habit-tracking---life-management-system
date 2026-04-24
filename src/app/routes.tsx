@@ -1,6 +1,6 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { AppShell } from "./layout/AppShell";
-import { AnalyticsPage } from "../features/habits/pages/AnalyticsPage";
+import { AnalyticsPage } from "../features/analytics/pages/AnalyticsPage";
 import { TrackerPage } from "../features/habits/pages/TrackerPage";
 
 const router = createBrowserRouter([
