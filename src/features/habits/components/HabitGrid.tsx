@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import dayjs from "dayjs";
 import { useMemo } from "react";
+import { isHabitCompleted } from "../../../domain/calculations/progress";
 import { useHabitStore } from "../../../store/useHabitStore";
 import { monthRangeKeys } from "../../../utils/date";
 
@@ -49,14 +50,11 @@ export function HabitGrid() {
             <TableRow key={habit.id}>
               <TableCell>{habit.title}</TableCell>
               {dateKeys.map((dateKey) => {
-                const checked = completions.some(
-                  (c) => c.habitId === habit.id && c.dateKey === dateKey,
-                );
                 return (
                   <TableCell key={`${habit.id}-${dateKey}`} align="center">
                     <Checkbox
                       size="small"
-                      checked={checked}
+                      checked={isHabitCompleted(completions, habit.id, dateKey)}
                       onChange={() => toggleCompletion(habit.id, dateKey)}
                     />
                   </TableCell>

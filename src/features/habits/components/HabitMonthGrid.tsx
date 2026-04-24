@@ -1,12 +1,13 @@
 import { Box, Paper, Typography } from "@mui/material";
 import dayjs from "dayjs";
-import type { Completion } from "../../../domain/models/completion";
+import type { CompletionMap } from "../../../domain/models/completion";
+import { isHabitCompleted } from "../../../domain/calculations/progress";
+import { getWeekStartMondayKey } from "../../../domain/calculations/weekly";
 import type { Habit } from "../../../domain/models/habit";
-import { isHabitCompletedOnDate } from "../lib/habitInsights";
 
 interface HabitMonthGridProps {
   habits: Habit[];
-  completions: Completion[];
+  completions: CompletionMap;
   dateKeys: string[];
   onToggle: (habitId: string, dateKey: string) => void;
 }
@@ -27,12 +28,6 @@ const weekBands = [
   },
 ] as const;
 
-function getWeekStartKey(dateKey: string) {
-  const date = dayjs(dateKey);
-  const mondayOffset = (date.day() + 6) % 7;
-  return date.subtract(mondayOffset, "day").format("YYYY-MM-DD");
-}
-
 export function HabitMonthGrid({
   habits,
   completions,
@@ -40,7 +35,9 @@ export function HabitMonthGrid({
   onToggle,
 }: HabitMonthGridProps) {
   const gridTemplateColumns = `${HABIT_COLUMN_WIDTH}px repeat(${dateKeys.length}, ${DAY_COLUMN_WIDTH}px)`;
-  const weekStartOrder = Array.from(new Set(dateKeys.map(getWeekStartKey)));
+  const weekStartOrder = Array.from(
+    new Set(dateKeys.map(getWeekStartMondayKey)),
+  );
   const weekIndexByStart = new Map(
     weekStartOrder.map((weekStart, index) => [weekStart, index]),
   );
@@ -80,7 +77,7 @@ export function HabitMonthGrid({
 
           {dateKeys.map((dateKey, index) => {
             const weekIndex =
-              weekIndexByStart.get(getWeekStartKey(dateKey)) ?? 0;
+              weekIndexByStart.get(getWeekStartMondayKey(dateKey)) ?? 0;
             const band = weekBands[weekIndex % weekBands.length];
             const isWeekStart = index === 0 || dayjs(dateKey).day() === 1;
 
@@ -158,13 +155,13 @@ export function HabitMonthGrid({
               </Box>
 
               {dateKeys.map((dateKey, index) => {
-                const checked = isHabitCompletedOnDate(
+                const checked = isHabitCompleted(
                   completions,
                   habit.id,
                   dateKey,
                 );
                 const weekIndex =
-                  weekIndexByStart.get(getWeekStartKey(dateKey)) ?? 0;
+                  weekIndexByStart.get(getWeekStartMondayKey(dateKey)) ?? 0;
                 const band = weekBands[weekIndex % weekBands.length];
                 const isWeekStart = index === 0 || dayjs(dateKey).day() === 1;
 
