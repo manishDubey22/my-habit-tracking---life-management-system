@@ -48,7 +48,9 @@ export function SummaryCards({ metrics }: { metrics: SummaryMetric[] }) {
               }}
             >
               <Stack spacing={2}>
-                <Typography variant="body1">{metric.label}</Typography>
+                <Typography variant="h4" sx={{ fontSize: "1.1rem" }}>
+                  {metric.label}
+                </Typography>
                 <Box
                   sx={{
                     display: "flex",

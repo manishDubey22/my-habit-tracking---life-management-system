@@ -91,19 +91,19 @@ export function TrackerPage() {
         </Paper>
       ) : (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          <DailyBarChartCard data={analytics.dailySeries} />
-          <CategoryProgressChartCard data={analytics.categorySeries} />
           <HabitMonthGrid
             habits={analytics.habits}
             completions={completions}
             dateKeys={analytics.monthDateKeys}
             onToggle={toggleCompletion}
           />
+          <DailyBarChartCard data={analytics.dailySeries} />
+          <CategoryProgressChartCard data={analytics.categorySeries} />
           <Grid container spacing={3}>
             <Grid size={{ xs: 12, xl: 8 }}>
               <TopHabitsTable habits={analytics.topHabits} />
             </Grid>
-            <Grid size={{ xs: 12, xl: 4 }}>
+            {/* <Grid size={{ xs: 12, xl: 4 }}>
               <Paper sx={{ p: 3, borderRadius: 4, height: "100%" }}>
                 <Typography variant="h3">V2 Enhancements</Typography>
                 <Typography color="text.secondary" sx={{ mt: 1 }}>
@@ -112,7 +112,7 @@ export function TrackerPage() {
                   now wired into the tracker.
                 </Typography>
               </Paper>
-            </Grid>
+            </Grid> */}
           </Grid>
         </Box>
       )}
