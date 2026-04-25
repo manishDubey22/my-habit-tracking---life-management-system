@@ -43,6 +43,29 @@ export interface CategoryYearData {
   percentage: number;
 }
 
+export interface YearComparisonResult {
+  yearA: number;
+  yearB: number;
+  delta: number;
+  data: Array<{
+    month: string;
+    yearA: number;
+    yearB: number;
+  }>;
+}
+
+export interface HabitTrendPoint {
+  month: string;
+  value: number;
+}
+
+export interface HabitTrend {
+  habitId: string;
+  habitName: string;
+  color: string;
+  data: HabitTrendPoint[];
+}
+
 function getYearWindow(year: number) {
   const start = dayjs().year(year).startOf("year");
   const currentYear = dayjs().year();
@@ -321,4 +344,68 @@ export function getCategoryYearlyProgress(
       };
     })
     .sort((left, right) => right.percentage - left.percentage);
+}
+
+export function getYearComparison(
+  yearA: number,
+  yearB: number,
+  habits: Habit[],
+  completions: CompletionMap,
+): YearComparisonResult {
+  const trendA = getMonthlyTrend(yearA, habits, completions);
+  const trendB = getMonthlyTrend(yearB, habits, completions);
+  const summaryA = getYearSummary(yearA, habits, completions);
+  const summaryB = getYearSummary(yearB, habits, completions);
+
+  return {
+    yearA,
+    yearB,
+    delta: summaryB.avgConsistency - summaryA.avgConsistency,
+    data: trendA.map((month, index) => ({
+      month: month.month,
+      yearA: month.value,
+      yearB: trendB[index]?.value ?? 0,
+    })),
+  };
+}
+
+export function getHabitTrendTimeline(
+  year: number,
+  habits: Habit[],
+  completions: CompletionMap,
+): HabitTrend[] {
+  const activeHabits = habits.filter(
+    (habit) => habit.active && getHabitWindowForYear(habit, year),
+  );
+
+  return activeHabits.map((habit) => {
+    const data = Array.from({ length: 12 }, (_, monthIndex) => {
+      const month = dayjs().month(monthIndex).format("MMM");
+      const window = getHabitWindowForMonth(habit, year, monthIndex);
+
+      if (!window) {
+        return { month, value: 0 };
+      }
+
+      const total = window.end.diff(window.start, "day") + 1;
+      const completed = countCompletionsBetween(
+        completions,
+        habit.id,
+        window.start,
+        window.end,
+      );
+
+      return {
+        month,
+        value: total === 0 ? 0 : Math.round((completed / total) * 100),
+      };
+    });
+
+    return {
+      habitId: habit.id,
+      habitName: habit.title,
+      color: habit.color ?? "#8f2eff",
+      data,
+    };
+  });
 }

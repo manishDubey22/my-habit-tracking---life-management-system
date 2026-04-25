@@ -11,6 +11,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <TrackerPage /> },
       { path: "analytics", element: <AnalyticsPage /> },
+      { path: "analytics/:year/:month", element: <AnalyticsPage /> },
       { path: "analytics/year", element: <YearlyInsightsPage /> },
       { path: "yearly-insights", element: <YearlyInsightsPage /> },
     ],

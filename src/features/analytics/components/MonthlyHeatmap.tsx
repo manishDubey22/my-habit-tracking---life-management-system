@@ -1,4 +1,4 @@
-import { Box, Paper, Tooltip, Typography } from "@mui/material";
+import { Box, ButtonBase, Paper, Tooltip, Typography } from "@mui/material";
 import { appPalette } from "../../../theme";
 
 interface MonthlyHeatmapProps {
@@ -10,6 +10,7 @@ interface MonthlyHeatmapProps {
     totalPossible: number;
     hasData: boolean;
   }>;
+  onMonthClick?: (monthIndex: number) => void;
 }
 
 function getHeatColor(value: number, hasData: boolean) {
@@ -28,7 +29,7 @@ function getHeatText(value: number, hasData: boolean) {
   return appPalette.violetStrong;
 }
 
-export function MonthlyHeatmap({ months }: MonthlyHeatmapProps) {
+export function MonthlyHeatmap({ months, onMonthClick }: MonthlyHeatmapProps) {
   return (
     <Paper sx={{ p: { xs: 2.5, md: 3 }, borderRadius: 4 }}>
       <Typography variant="h3" sx={{ mb: 1 }}>
@@ -59,8 +60,12 @@ export function MonthlyHeatmap({ months }: MonthlyHeatmapProps) {
               title={`${month.month}: ${month.hasData ? `${month.value}% consistency (${month.completed}/${month.totalPossible})` : "No data yet"}`}
               arrow
             >
-              <Box
+              <ButtonBase
+                onClick={() => onMonthClick?.(month.monthIndex)}
+                disabled={!onMonthClick}
                 sx={{
+                  width: "100%",
+                  textAlign: "left",
                   p: 2,
                   minHeight: 136,
                   borderRadius: 3,
@@ -111,7 +116,7 @@ export function MonthlyHeatmap({ months }: MonthlyHeatmapProps) {
                     ? `${month.completed} completed of ${month.totalPossible}`
                     : "No data yet"}
                 </Typography>
-              </Box>
+              </ButtonBase>
             </Tooltip>
           );
         })}
