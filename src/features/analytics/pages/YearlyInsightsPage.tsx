@@ -3,13 +3,17 @@ import dayjs from "dayjs";
 import { useMemo, useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import {
+  getCategoryYearlyProgress,
   getMonthlyProgress,
+  getMonthlyTrend,
   getTopHabitsYear,
   getYearSummary,
 } from "../../../domain/calculations/yearly";
 import { useHabitStore } from "../../../store/useHabitStore";
 import { PageHeader } from "../../habits/components/PageHeader";
+import { CategoryYearChart } from "../components/CategoryYearChart";
 import { MonthlyHeatmap } from "../components/MonthlyHeatmap";
+import { MonthlyTrendChart } from "../components/MonthlyTrendChart";
 import { TopHabitsYear } from "../components/TopHabitsYear";
 import { YearSelector } from "../components/YearSelector";
 import { YearSummaryCards } from "../components/YearSummaryCards";
@@ -22,6 +26,12 @@ export function YearlyInsightsPage() {
   const yearly = useMemo(() => {
     const summary = getYearSummary(selectedYear, habits, completions);
     const monthly = getMonthlyProgress(selectedYear, habits, completions);
+    const monthlyTrend = getMonthlyTrend(selectedYear, habits, completions);
+    const categoryYearly = getCategoryYearlyProgress(
+      selectedYear,
+      habits,
+      completions,
+    );
     const topHabits = getTopHabitsYear(selectedYear, habits, completions);
     const hasHabits = habits.some((habit) => habit.active);
     const hasAnyMonthData = monthly.some((month) => month.hasData);
@@ -30,6 +40,8 @@ export function YearlyInsightsPage() {
     return {
       summary,
       monthly,
+      monthlyTrend,
+      categoryYearly,
       topHabits,
       hasHabits,
       hasAnyMonthData,
@@ -80,6 +92,8 @@ export function YearlyInsightsPage() {
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
           <YearSummaryCards summary={yearly.summary} />
           <MonthlyHeatmap months={yearly.monthly} />
+          <MonthlyTrendChart data={yearly.monthlyTrend} />
+          <CategoryYearChart data={yearly.categoryYearly} />
           <TopHabitsYear habits={yearly.topHabits} />
         </Box>
       )}

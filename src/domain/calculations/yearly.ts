@@ -31,6 +31,18 @@ export interface HabitYearStat {
   badge?: string;
 }
 
+export interface MonthlyTrendData {
+  month: string;
+  value: number;
+}
+
+export interface CategoryYearData {
+  category: Habit["category"];
+  completed: number;
+  total: number;
+  percentage: number;
+}
+
 function getYearWindow(year: number) {
   const start = dayjs().year(year).startOf("year");
   const currentYear = dayjs().year();
@@ -247,4 +259,66 @@ export function getTopHabitsYear(
     }));
 
   return ranked;
+}
+
+export function getMonthlyTrend(
+  year: number,
+  habits: Habit[],
+  completions: CompletionMap,
+): MonthlyTrendData[] {
+  return getMonthlyProgress(year, habits, completions).map((month) => ({
+    month: month.month,
+    value: month.value,
+  }));
+}
+
+export function getCategoryYearlyProgress(
+  year: number,
+  habits: Habit[],
+  completions: CompletionMap,
+): CategoryYearData[] {
+  const activeHabits = habits.filter(
+    (habit) => habit.active && getHabitWindowForYear(habit, year),
+  );
+  const categories = Array.from(
+    new Set(activeHabits.map((habit) => habit.category)),
+  );
+
+  return categories
+    .map((category) => {
+      const categoryHabits = activeHabits.filter(
+        (habit) => habit.category === category,
+      );
+
+      const stats = categoryHabits.reduce(
+        (acc, habit) => {
+          const window = getHabitWindowForYear(habit, year);
+          if (!window) return acc;
+
+          const total = window.end.diff(window.start, "day") + 1;
+          const completed = countCompletionsBetween(
+            completions,
+            habit.id,
+            window.start,
+            window.end,
+          );
+
+          acc.total += total;
+          acc.completed += completed;
+          return acc;
+        },
+        { completed: 0, total: 0 },
+      );
+
+      return {
+        category,
+        completed: stats.completed,
+        total: stats.total,
+        percentage:
+          stats.total === 0
+            ? 0
+            : Math.round((stats.completed / stats.total) * 100),
+      };
+    })
+    .sort((left, right) => right.percentage - left.percentage);
 }
