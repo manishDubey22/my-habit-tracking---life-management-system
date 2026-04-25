@@ -15,9 +15,13 @@ interface MonthlyTrendChartProps {
     month: string;
     value: number;
   }>;
+  onMonthClick?: (monthLabel: string) => void;
 }
 
-export function MonthlyTrendChart({ data }: MonthlyTrendChartProps) {
+export function MonthlyTrendChart({
+  data,
+  onMonthClick,
+}: MonthlyTrendChartProps) {
   const theme = useTheme();
   const highestValue = Math.max(...data.map((item) => item.value), 0);
 
@@ -31,7 +35,15 @@ export function MonthlyTrendChart({ data }: MonthlyTrendChartProps) {
       </Typography>
 
       <ResponsiveContainer width="100%" height={320}>
-        <LineChart data={data}>
+        <LineChart
+          data={data}
+          onClick={(state) => {
+            const monthLabel = state?.activeLabel;
+            if (typeof monthLabel === "string") {
+              onMonthClick?.(monthLabel);
+            }
+          }}
+        >
           <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
           <XAxis dataKey="month" stroke={theme.palette.text.secondary} />
           <YAxis domain={[0, 100]} stroke={theme.palette.text.secondary} />

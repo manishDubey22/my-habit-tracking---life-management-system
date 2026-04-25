@@ -1,7 +1,7 @@
 import { Box, Button, Grid, Paper, Typography } from "@mui/material";
 import dayjs from "dayjs";
-import { useState } from "react";
-import { Link as RouterLink } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link as RouterLink, useParams } from "react-router-dom";
 import type { Habit } from "../../../domain/models/habit";
 import { useHabitStore } from "../../../store/useHabitStore";
 import { HabitDialog } from "../../habits/components/HabitDialog";
@@ -15,17 +15,38 @@ import { WeeklyCards } from "../components/WeeklyCards";
 import { useAnalyticsData } from "../hooks/useAnalyticsData";
 
 export function AnalyticsPage() {
+  const params = useParams<{ year?: string; month?: string }>();
   const addHabit = useHabitStore((state) => state.addHabit);
   const updateHabit = useHabitStore((state) => state.updateHabit);
   const deleteHabit = useHabitStore((state) => state.deleteHabit);
-  const [visibleMonth, setVisibleMonth] = useState(() =>
-    dayjs().startOf("month"),
-  );
+  const routedMonth = useMemo(() => {
+    const year = Number(params.year);
+    const month = Number(params.month);
+
+    if (
+      Number.isInteger(year) &&
+      Number.isInteger(month) &&
+      month >= 1 &&
+      month <= 12
+    ) {
+      return dayjs()
+        .year(year)
+        .month(month - 1)
+        .startOf("month");
+    }
+
+    return dayjs().startOf("month");
+  }, [params.month, params.year]);
+  const [visibleMonth, setVisibleMonth] = useState(() => routedMonth);
   const [editingHabit, setEditingHabit] = useState<Habit | undefined>(
     undefined,
   );
   const [dialogOpen, setDialogOpen] = useState(false);
   const analytics = useAnalyticsData(visibleMonth);
+
+  useEffect(() => {
+    setVisibleMonth(routedMonth);
+  }, [routedMonth]);
 
   const openCreate = () => {
     setEditingHabit(undefined);
@@ -45,6 +66,20 @@ export function AnalyticsPage() {
         actionLabel="Tracker"
         actionTo="/"
       />
+
+      <Box sx={{ mb: 2 }}>
+        <Button
+          component={RouterLink}
+          to={`/analytics/year`}
+          variant="text"
+          sx={{ px: 0 }}
+        >
+          Yearly Insights
+        </Button>
+        <Typography variant="body2" color="text.secondary">
+          {analytics.month.format("MMMM YYYY")} Analytics
+        </Typography>
+      </Box>
 
       <SummaryCards metrics={analytics.summaryMetrics} />
 
@@ -72,6 +107,13 @@ export function AnalyticsPage() {
             variant="contained"
           >
             Yearly Insights
+          </Button>
+          <Button
+            component={RouterLink}
+            to={`/analytics/year`}
+            variant="outlined"
+          >
+            Back To Year View
           </Button>
           <Button
             variant="outlined"
