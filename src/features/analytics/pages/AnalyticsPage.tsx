@@ -1,6 +1,7 @@
 import { Box, Button, Grid, Paper, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { useState } from "react";
+import { Link as RouterLink } from "react-router-dom";
 import type { Habit } from "../../../domain/models/habit";
 import { useHabitStore } from "../../../store/useHabitStore";
 import { HabitDialog } from "../../habits/components/HabitDialog";
@@ -65,6 +66,13 @@ export function AnalyticsPage() {
         </Typography>
 
         <Box sx={{ display: "flex", gap: 1.25, flexWrap: "wrap" }}>
+          <Button
+            component={RouterLink}
+            to="/analytics/year"
+            variant="contained"
+          >
+            Yearly Insights
+          </Button>
           <Button
             variant="outlined"
             onClick={() =>
