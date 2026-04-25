@@ -6,7 +6,6 @@ interface PageHeaderProps {
   subtitle: string;
   actionLabel: string;
   actionTo: string;
-  actionIcon: "tracker" | "analytics";
 }
 
 export function PageHeader({
@@ -14,10 +13,7 @@ export function PageHeader({
   subtitle,
   actionLabel,
   actionTo,
-  actionIcon,
 }: PageHeaderProps) {
-  const iconLabel = actionIcon === "analytics" ? "Analytics" : "Tracker";
-
   return (
     <Paper
       sx={{
@@ -43,7 +39,7 @@ export function PageHeader({
         </Box>
 
         <Button component={RouterLink} to={actionTo} variant="contained">
-          {iconLabel}: {actionLabel}
+          {actionLabel}
         </Button>
       </Box>
     </Paper>

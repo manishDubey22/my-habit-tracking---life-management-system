@@ -1,5 +1,12 @@
-import { Box, Grid, Paper, Stack, Typography } from "@mui/material";
-import type { SummaryMetric } from "../lib/habitInsights";
+import {
+  Box,
+  CircularProgress,
+  Grid,
+  Paper,
+  Stack,
+  Typography,
+} from "@mui/material";
+import type { SummaryMetric } from "../../../domain/calculations/progress";
 
 const toneStyles = {
   violet: {
@@ -41,8 +48,17 @@ export function SummaryCards({ metrics }: { metrics: SummaryMetric[] }) {
               }}
             >
               <Stack spacing={2}>
-                <Typography variant="body1">{metric.label}</Typography>
-                <Box>
+                <Typography variant="h4" sx={{ fontSize: "1.1rem" }}>
+                  {metric.label}
+                </Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 2,
+                  }}
+                >
                   <Typography
                     variant="h2"
                     sx={{
@@ -52,6 +68,28 @@ export function SummaryCards({ metrics }: { metrics: SummaryMetric[] }) {
                   >
                     {metric.value}
                   </Typography>
+                  {typeof metric.progress === "number" ? (
+                    <Box sx={{ position: "relative", display: "inline-flex" }}>
+                      <CircularProgress
+                        variant="determinate"
+                        value={100}
+                        size={48}
+                        thickness={4.2}
+                        sx={{ color: "rgba(38, 37, 30, 0.08)" }}
+                      />
+                      <CircularProgress
+                        variant="determinate"
+                        value={metric.progress}
+                        size={48}
+                        thickness={4.2}
+                        sx={{
+                          color: tone.color,
+                          position: "absolute",
+                          left: 0,
+                        }}
+                      />
+                    </Box>
+                  ) : null}
                 </Box>
               </Stack>
             </Paper>

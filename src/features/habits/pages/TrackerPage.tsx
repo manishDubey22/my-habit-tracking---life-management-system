@@ -1,46 +1,36 @@
-import { Box, Button, Paper, Typography } from "@mui/material";
+import { Box, Button, Grid, Paper, Typography } from "@mui/material";
 import dayjs from "dayjs";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useHabitStore } from "../../../store/useHabitStore";
+import { CategoryProgressChartCard } from "../../analytics/components/CategoryProgressChartCard";
+import { DailyBarChartCard } from "../../analytics/components/DailyBarChartCard";
+import { TopHabitsTable } from "../../analytics/components/TopHabitsTable";
+import { useAnalyticsData } from "../../analytics/hooks/useAnalyticsData";
 import { HabitDialog } from "../components/HabitDialog";
 import { HabitMonthGrid } from "../components/HabitMonthGrid";
 import { PageHeader } from "../components/PageHeader";
 import { SummaryCards } from "../components/SummaryCards";
-import {
-  buildSummaryMetrics,
-  getActiveHabits,
-  getMonthKeys,
-} from "../lib/habitInsights";
 
 export function TrackerPage() {
-  const habits = useHabitStore((state) => state.habits);
   const completions = useHabitStore((state) => state.completions);
   const addHabit = useHabitStore((state) => state.addHabit);
   const toggleCompletion = useHabitStore((state) => state.toggleCompletion);
-
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [visibleMonth, setVisibleMonth] = useState(() =>
     dayjs().startOf("month"),
   );
-
-  const activeHabits = useMemo(() => getActiveHabits(habits), [habits]);
-  const monthKeys = useMemo(() => getMonthKeys(visibleMonth), [visibleMonth]);
-  const summaryMetrics = useMemo(
-    () => buildSummaryMetrics(habits, completions, visibleMonth),
-    [completions, habits, visibleMonth],
-  );
+  const analytics = useAnalyticsData(visibleMonth);
 
   return (
     <Box>
       <PageHeader
         title="Routine Tracker"
-        subtitle="Build better habits, one day at a time."
+        subtitle="A V2 habit operating system with analytics-first tracking."
         actionLabel="Analytics"
         actionTo="/analytics"
-        actionIcon="analytics"
       />
 
-      <SummaryCards metrics={summaryMetrics} />
+      <SummaryCards metrics={analytics.summaryMetrics} />
 
       <Box
         sx={{
@@ -56,7 +46,7 @@ export function TrackerPage() {
           variant="h2"
           sx={{ fontSize: { xs: "2.2rem", md: "2.6rem" } }}
         >
-          {visibleMonth.format("MMMM YYYY")}
+          {analytics.month.format("MMMM YYYY")}
         </Typography>
 
         <Box sx={{ display: "flex", gap: 1.25, flexWrap: "wrap" }}>
@@ -66,7 +56,7 @@ export function TrackerPage() {
               setVisibleMonth((month) => month.subtract(1, "month"))
             }
           >
-            ← Previous
+            Previous
           </Button>
           <Button
             variant="outlined"
@@ -78,7 +68,7 @@ export function TrackerPage() {
             variant="outlined"
             onClick={() => setVisibleMonth((month) => month.add(1, "month"))}
           >
-            Next →
+            Next
           </Button>
           <Button variant="contained" onClick={() => setDialogOpen(true)}>
             Add Habit
@@ -86,7 +76,7 @@ export function TrackerPage() {
         </Box>
       </Box>
 
-      {activeHabits.length === 0 ? (
+      {analytics.habits.length === 0 ? (
         <Paper sx={{ p: { xs: 3, md: 4 }, borderRadius: 4 }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
             <Typography variant="h3">Start your first routine</Typography>
@@ -100,12 +90,31 @@ export function TrackerPage() {
           </Box>
         </Paper>
       ) : (
-        <HabitMonthGrid
-          habits={activeHabits}
-          completions={completions}
-          dateKeys={monthKeys}
-          onToggle={toggleCompletion}
-        />
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+          <HabitMonthGrid
+            habits={analytics.habits}
+            completions={completions}
+            dateKeys={analytics.monthDateKeys}
+            onToggle={toggleCompletion}
+          />
+          <DailyBarChartCard data={analytics.dailySeries} />
+          <CategoryProgressChartCard data={analytics.categorySeries} />
+          <Grid container spacing={3}>
+            <Grid size={{ xs: 12, xl: 8 }}>
+              <TopHabitsTable habits={analytics.topHabits} />
+            </Grid>
+            {/* <Grid size={{ xs: 12, xl: 4 }}>
+              <Paper sx={{ p: 3, borderRadius: 4, height: "100%" }}>
+                <Typography variant="h3">V2 Enhancements</Typography>
+                <Typography color="text.secondary" sx={{ mt: 1 }}>
+                  Analytics-first layout, reusable calculation modules,
+                  centralized theming, and a backend-ready completion map are
+                  now wired into the tracker.
+                </Typography>
+              </Paper>
+            </Grid> */}
+          </Grid>
+        </Box>
       )}
 
       <HabitDialog

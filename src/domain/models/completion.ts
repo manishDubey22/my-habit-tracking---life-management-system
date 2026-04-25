@@ -1,10 +1,10 @@
-export interface Completion {
+export type CompletionMap = Record<string, boolean>;
+
+export interface LegacyCompletion {
   id: string;
   habitId: string;
-  dateKey: string; // YYYY-MM-DD local day key
+  dateKey: string;
   completed: boolean;
   createdAt: string;
   updatedAt: string;
 }
-
-export type CompletionMap = Record<string, boolean>;
