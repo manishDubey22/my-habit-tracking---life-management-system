@@ -11,6 +11,7 @@ const palette = {
   violet: "#8f2eff",
   violetStrong: "#6f1df4",
   orange: "#f54e00",
+  gold: "#c08532",
   success: "#1f8a65",
   rose: "#cf2d56",
   sky: "#9fbbe0",
